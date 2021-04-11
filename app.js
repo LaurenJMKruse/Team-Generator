@@ -1,5 +1,7 @@
 //***************************
 // A. VARIABLES
+
+// 01. Dependencies
 const Manager = require('./lib/Manager');
 const Engineer = require('./lib/Engineer');
 const Intern = require('./lib/Intern');
@@ -7,16 +9,21 @@ const inquirer = require('inquirer');
 const path = require('path');
 const fs = require('fs');
 
+// 02. File paths
 const OUTPUT_DIR = path.resolve(__dirname, 'output');
-const outputPath = path.join(OUTPUT_DIR, 'team.htm');
+const outputPath = path.join(OUTPUT_DIR, 'team.html');
 
+// 03. HTML
 const render = require('./lib/htmlRenderer');
+
+// 04. Global
+let employeeType;
 
 //***************************
 // B. ARRAYS
-const teamRoles = [manager, engineer, intern];
-const teamEmployees = [];
-const employeeIDs = [];
+const teamRoles = ['Manager', 'Engineer', 'Intern'];
+const actionChoiceArray = [`I want to enter another team member.`, `I'm done adding employees.`];
+const employees = [];
 
 //***************************
 // C. FUNCTIONS
@@ -24,7 +31,7 @@ const employeeIDs = [];
 // 01. Initialize application
 function init() {
     console.log('WELCOME TO THE TEAM BUILDER!');
-    console.log('Please follow the prompts to create your team.');
+    console.log(`Please follow the prompts to create your team.\n`);
     createTeamMember();
 }
 
@@ -33,92 +40,93 @@ function createTeamMember() {
     console.log('ACTION: ADD TEAM MEMBER');
     inquirer.prompt([
         {
+            name: 'employeeName',
             type: 'input',
-            name: 'name',
-            message: `State the employee's full name.`,
-            validate: checkInput(answer)
+            message: `State the employee's full name.`
         },
         {
+            name: 'employeeID',
             type: 'input',
-            name: 'id',
-            message: 'Enter the employee identification number.',
-            validate: checkInput(answer)
+            message: `Enter the employee's identification number.`
         },
         {
-            type: 'input',
             name: 'title',
-            message: `What is the employee's title?`,
-            validate: checkInput(answer)
+            type: 'input',
+            message: `What is the employee's title?`
         },
         {
-            type: 'input',
             name: 'department',
-            message: `State the department.`,
-            validate: checkInput(answer)
+            type: 'input',
+            message: `State the employee's department.`,
         },
         {
-            type: 'input',
-            name: 'email',
+            name: 'emailAddress',
+            type: 'input',    
             message: `What is the employee's email address?`,
-            validate: checkInput(answer)
         },
         {
+            name: 'phoneNumber',
             type: 'input',
-            name: 'phone',
             message: `What is their phone number?`,
-            validate: checkInput(answer)
         },
         {
-            type: 'list',
             name: 'roleName',
+            type: 'list',
             message: 'Please select the role you wish to add.',
-            choices: teamRoles,
+            choices: teamRoles
         }
-    ]);
-
-    console.log('You have selected the role', roleName);
-    
-    switch (roleName) {
-        case 'manager':
-            addManager();
-            break;
+    ]).then(userAnswers => {        
+        employeeType = userAnswers.roleName;
         
-        case 'intern':
-            addIntern();
-            break;
+        console.log('You have selected the role', employeeType);
     
-        case 'engineer':
-            addEngineer();
-            break;
-    }
+        switch (employeeType) {
+            case 'Manager':
+                addManager();
+                break;
+        
+            case 'Intern':
+                addIntern();
+                break;
+    
+            case 'Engineer':
+                addEngineer();
+                break;
+        }
+    }).catch(error => {
+        if(error){
+            console.log(error);
+        }
+    });
 };
 
-// 02. Validate input
-function checkInput(userEntry) {
-    if (!userEntry) {
-        return 'This is a mandatory field.'
-    }
-};
-
-// 03. Add Manager
+// 02. Add Manager
 function addManager() {
     console.log('ACTION: CREATING MANAGER ROLE');
     inquirer.prompt([
         {
-            type: 'input',
             name: 'lineOfBusiness',
-            message: `What line of business is the manager's department in?`,
-            validate: checkInput(answer)
+            type: 'input',
+            message: `What line of business is the manager's department in?`
         },
         {
+            name: 'gitHubName',
             type: 'input',
-            name: 'gitHub',
-            message: `State the manager's GitHub username.`,
-            validate: checkInput(answer)
+            message: `State the manager's GitHub username.`
         }
-    ]);
-    
-    console.log('Manager entry complete.');
+    ]).then(managerAnswers => {
+        const manager = new Manager(managerAnswers.lineOfBusiness, managerAnswers.gitHubName);
+        employees.push(manager);
+        console.log(employees);
+
+        console.log('Manager entry complete.');
+        
+        determineAction();
+    }).catch(error => {
+        if(error){
+            console.log(error);
+        }
+    });
 };
 
 // 03. Add Engineer
@@ -126,20 +134,28 @@ function addEngineer() {
     console.log('ACTION: CREATING ENGINEER ROLE');
     inquirer.prompt([
         {
-            type: 'input',
             name: 'certifications',
-            message: `List the employee's certifications.`,
-            validate: checkInput(answer)
+            type: 'input',
+            message: `List the employee's certifications.`
         },
         {
+            name: 'gitHubName',
             type: 'input',
-            name: 'gitHub',
-            message: `State the employee's GitHub username.`,
-            validate: checkInput(answer)
+            message: `State the employee's GitHub username.`
         }
-    ]);
-    
-    console.log('Manager entry complete.');
+    ]).then(engineerAnswers => {
+        const engineer = new Engineer(engineerAnswers.certifications, engineerAnswers.gitHubName);
+        employees.push(engineer);
+        console.log(employees)
+
+        console.log('Engineer entry complete.');
+
+        determineAction();
+    }).catch(error => {
+        if(error){
+            console.log(error);
+        }
+    });
 };
 
 // 04. Add Intern
@@ -147,37 +163,75 @@ function addIntern() {
     console.log('ACTION: CREATING INTERN ROLE');
     inquirer.prompt([
         {
-            type: 'input',
             name: 'schoolName',
-            message: `What school does the intern attend?`,
-            validate: checkInput(answer)
+            type: 'input',
+            message: `What school does the intern attend?`
         },
         {
+            name: 'internMajor',
             type: 'input',
-            name: 'major',
-            message: `What is their major?`,
-            validate: checkInput(answer)
+            message: `What is their major?`
         },
         {
+            name: 'internMinor',
             type: 'input',
-            name: 'major',
-            message: `What is their minor?`,
-            validate: checkInput(answer)
+            message: `What is their minor?`
         },
         {
-            type: 'input',
             name: 'graduationDate',
-            message: `State their expected graduation date.`,
-            validate: checkInput(answer)
+            type: 'input',
+            message: `State their expected graduation date.`
         }
-    ]);
-    
-    console.log('Intern entry complete.');
+    ]).then(internAnswers => {
+        const intern = new Intern(internAnswers.schoolName, internAnswers.internMajor, internAnswers.internMinor, internAnswers.graduationDate);
+        employees.push(intern);
+        console.log(employees);
+
+        console.log('Intern entry complete.');
+        
+        determineAction();
+    }).catch(error => {
+        if(error){
+            console.log(error);
+        }
+    });
 };
 
-// 05. Assemble Team
+// 06. Determine next action
+function determineAction() {
+    inquirer.prompt([
+        {
+            name: 'nextAction',
+            type: 'list',
+            message: 'What do you wish to do next?',
+            choices: actionChoiceArray
+        }    
+    ]).then(actionAnswer => {
+            const selectedAction = actionAnswer.nextAction;
 
+            switch (selectedAction) {
+                case 'I want to enter another team member.':
+                    createTeamMember();
+                    break;
+                
+                case `I'm done adding employees.`:
+                    assembleTeam();
+                    break;
+            }
+    }).catch(error => {
+            if(error) {
+                console.log(error);
+            }
+    });
+        
+    console.log('Next action determined.');
+};
 
+// 07. Assemble team
+function assembleTeam() {
+    console.log('ACTION: TEAM BEING ASSEMBLED');
+    fs.writeFileSync(outputPath, render(employees), 'utf-8');
+};
 
 //***************************
 // D. MAIN PROCESS
