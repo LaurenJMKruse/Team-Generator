@@ -19,11 +19,13 @@ const render = require('./lib/htmlRenderer');
 // 04. Global
 let employeeType;
 
+
 //***************************
 // B. ARRAYS
 const teamRoles = ['Manager', 'Engineer', 'Intern'];
-const actionChoiceArray = [`I want to enter another team member.`, `I'm done adding employees.`];
+const actionChoiceArray = [`I want to enter a team member.`, `I'm done adding employees and want to generate my team.`, `I want to exit.`];
 const employees = [];
+
 
 //***************************
 // C. FUNCTIONS
@@ -32,51 +34,53 @@ const employees = [];
 function init() {
     console.log('WELCOME TO THE TEAM BUILDER!');
     console.log(`Please follow the prompts to create your team.\n`);
-    createTeamMember();
+
+    determineAction();
 }
 
-// 02. Add Team Member
+// 02. Determine action
+function determineAction() {
+    inquirer.prompt([
+        {
+            name: 'determineAction',
+            type: 'list',
+            message: 'What would you like to do?',
+            choices: actionChoiceArray
+        }    
+    ]).then(actionAnswer => {
+            const selectedAction = actionAnswer.determineAction;
+
+            switch (selectedAction) {
+                case 'I want to enter a team member.':
+                    createTeamMember();
+                    break;
+                
+                case `I'm done adding employees and want to generate my team.`:
+                    assembleTeam();
+                    break;
+
+                case `I want to exit.`:
+                   console.log('THANK YOU FOR USING THE TEAM BUILDER!');return;    
+            }
+    }).catch(error => {
+            if(error) {
+                console.log(error);
+            }
+    });
+};
+
+// 03. Add Team Member and select role
 function createTeamMember() {
     console.log('ACTION: ADD TEAM MEMBER');
     inquirer.prompt([
         {
-            name: 'employeeName',
-            type: 'input',
-            message: `State the employee's full name.`
-        },
-        {
-            name: 'employeeID',
-            type: 'input',
-            message: `Enter the employee's identification number.`
-        },
-        {
-            name: 'title',
-            type: 'input',
-            message: `What is the employee's title?`
-        },
-        {
-            name: 'department',
-            type: 'input',
-            message: `State the employee's department.`,
-        },
-        {
-            name: 'emailAddress',
-            type: 'input',    
-            message: `What is the employee's email address?`,
-        },
-        {
-            name: 'phoneNumber',
-            type: 'input',
-            message: `What is their phone number?`,
-        },
-        {
-            name: 'roleName',
+            name: 'role',
             type: 'list',
-            message: 'Please select the role you wish to add.',
+            message: `Please select the employee's role.`,
             choices: teamRoles
         }
     ]).then(userAnswers => {        
-        employeeType = userAnswers.roleName;
+        employeeType = userAnswers.role;
         
         console.log('You have selected the role', employeeType);
     
@@ -100,22 +104,52 @@ function createTeamMember() {
     });
 };
 
-// 02. Add Manager
+// 04. Add Manager
 function addManager() {
     console.log('ACTION: CREATING MANAGER ROLE');
     inquirer.prompt([
         {
-            name: 'lineOfBusiness',
+            name: 'managerName',
             type: 'input',
-            message: `What line of business is the manager's department in?`
+            message: `State the employee's full name.`
         },
         {
-            name: 'gitHubName',
+            name: 'managerId',
             type: 'input',
-            message: `State the manager's GitHub username.`
+            message: `Enter the employee's identification number.`
+        },
+        {
+            name: 'managerTitle',
+            type: 'input',
+            message: `What is the employee's title?`
+        },
+        {
+            name: 'managerDepartment',
+            type: 'input',
+            message: `State the employee's department.`,
+        },
+        {
+            name: 'managerEmail',
+            type: 'input',    
+            message: `What is the employee's email address?`,
+        },
+        {
+            name: 'managerPhone',
+            type: 'input',
+            message: `What is their phone number?`,
+        },
+        {
+            name: 'managerLineOfBusiness',
+            type: 'input',
+            message: `What line of business does the manager specialize in?`
+        },
+        {
+            name: 'managerOfficeNumber',
+            type: 'input',
+            message: `What is the manager's office number?`
         }
     ]).then(managerAnswers => {
-        const manager = new Manager(managerAnswers.lineOfBusiness, managerAnswers.gitHubName);
+        const manager = new Manager(managerAnswers.managerName, managerAnswers.managerId, managerAnswers.managerTitle, managerAnswers.managerDepartment, managerAnswers.managerEmail, managerAnswers.managerPhone, managerAnswers.managerLineOfBusiness, managerAnswers.managerOfficeNumber);
         employees.push(manager);
         console.log(employees);
 
@@ -129,22 +163,52 @@ function addManager() {
     });
 };
 
-// 03. Add Engineer
+// 05. Add Engineer
 function addEngineer() {
     console.log('ACTION: CREATING ENGINEER ROLE');
     inquirer.prompt([
         {
-            name: 'certifications',
+            name: 'engineerName',
+            type: 'input',
+            message: `State the employee's full name.`
+        },
+        {
+            name: 'engineerId',
+            type: 'input',
+            message: `Enter the employee's identification number.`
+        },
+        {
+            name: 'engineerTitle',
+            type: 'input',
+            message: `What is the employee's title?`
+        },
+        {
+            name: 'engineerDepartment',
+            type: 'input',
+            message: `State the employee's department.`,
+        },
+        {
+            name: 'engineerEmail',
+            type: 'input',    
+            message: `What is the employee's email address?`,
+        },
+        {
+            name: 'engineerPhone',
+            type: 'input',
+            message: `What is their phone number?`,
+        },
+        {
+            name: 'engineerCertifications',
             type: 'input',
             message: `List the employee's certifications.`
         },
         {
-            name: 'gitHubName',
+            name: 'engineerGitHub',
             type: 'input',
             message: `State the employee's GitHub username.`
         }
     ]).then(engineerAnswers => {
-        const engineer = new Engineer(engineerAnswers.certifications, engineerAnswers.gitHubName);
+        const engineer = new Engineer(engineerAnswers.engineerName, engineerAnswers.engineerId, engineerAnswers.engineerTitle, engineerAnswers.engineerDepartment, engineerAnswers.engineerEmail, engineerAnswers.engineerPhone, engineerAnswers.engineerCertifications, engineerAnswers.engineerGitHub);
         employees.push(engineer);
         console.log(employees)
 
@@ -158,12 +222,42 @@ function addEngineer() {
     });
 };
 
-// 04. Add Intern
+// 06. Add Intern
 function addIntern() {
     console.log('ACTION: CREATING INTERN ROLE');
     inquirer.prompt([
         {
-            name: 'schoolName',
+            name: 'internName',
+            type: 'input',
+            message: `State the employee's full name.`
+        },
+        {
+            name: 'internId',
+            type: 'input',
+            message: `Enter the employee's identification number.`
+        },
+        {
+            name: 'internTitle',
+            type: 'input',
+            message: `What is the employee's title?`
+        },
+        {
+            name: 'internDepartment',
+            type: 'input',
+            message: `State the employee's department.`,
+        },
+        {
+            name: 'internEmail',
+            type: 'input',    
+            message: `What is the employee's email address?`,
+        },
+        {
+            name: 'internPhone',
+            type: 'input',
+            message: `What is their phone number?`,
+        },
+        {
+            name: 'internSchool',
             type: 'input',
             message: `What school does the intern attend?`
         },
@@ -178,12 +272,12 @@ function addIntern() {
             message: `What is their minor?`
         },
         {
-            name: 'graduationDate',
+            name: 'internGraduationDate',
             type: 'input',
             message: `State their expected graduation date.`
         }
     ]).then(internAnswers => {
-        const intern = new Intern(internAnswers.schoolName, internAnswers.internMajor, internAnswers.internMinor, internAnswers.graduationDate);
+        const intern = new Intern(internAnswers.internName, internAnswers.internId, internAnswers.internTitle, internAnswers.internDepartment, internAnswers.internEmail, internAnswers.internPhone, internAnswers.internSchool, internAnswers.internMajor, internAnswers.internMinor, internAnswers.internGraduationDate);
         employees.push(intern);
         console.log(employees);
 
@@ -197,38 +291,13 @@ function addIntern() {
     });
 };
 
-// 06. Determine next action
-function determineAction() {
-    inquirer.prompt([
-        {
-            name: 'nextAction',
-            type: 'list',
-            message: 'What do you wish to do next?',
-            choices: actionChoiceArray
-        }    
-    ]).then(actionAnswer => {
-            const selectedAction = actionAnswer.nextAction;
-
-            switch (selectedAction) {
-                case 'I want to enter another team member.':
-                    createTeamMember();
-                    break;
-                
-                case `I'm done adding employees.`:
-                    assembleTeam();
-                    break;
-            }
-    }).catch(error => {
-            if(error) {
-                console.log(error);
-            }
-    });
-        
-    console.log('Next action determined.');
-};
-
 // 07. Assemble team
 function assembleTeam() {
+    // Create Output directory, if needed
+    if (!fs.existsSync(OUTPUT_DIR)) {
+        fs.mkdirSync(OUTPUT_DIR)
+    }
+
     console.log('ACTION: TEAM BEING ASSEMBLED');
     fs.writeFileSync(outputPath, render(employees), 'utf-8');
 };
@@ -236,14 +305,3 @@ function assembleTeam() {
 //***************************
 // D. MAIN PROCESS
 init();
-
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.

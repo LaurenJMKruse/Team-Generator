@@ -1,0 +1,24 @@
+.card-header {
+    background-color: lavender;
+    border: solid 5px purple;
+    font-weight: bold;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.employee-card {
+    max-width: 300px;
+    background-color: purple;
+    color: purple;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    
+}
+
+.list-group-item {
+    list-style-type: square;
+    list-style-position: inside;
+    color: purple;
+}
+
+body {
+    background-color: skyblue;
+}
